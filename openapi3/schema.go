@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"regexp"
 	"strconv"
+	"strings"
 	"unicode/utf16"
 
 	"github.com/getkin/kin-openapi/jsoninfo"
@@ -675,8 +676,40 @@ func (schema *Schema) visitSetOperations(value interface{}, fast bool) (err erro
 			if v == nil {
 				return foundUnresolvedRef(item.Ref)
 			}
-			if err := v.visitJSON(value, true); err == nil {
-				ok++
+			if schema.Discriminator == nil {
+				if err := v.visitJSON(value, true); err == nil {
+					ok++
+				}
+			} else {
+				m := value.(map[string]interface{})
+				var val string
+				if v, ok := m[schema.Discriminator.PropertyName].(string); !ok {
+					return &SchemaError{
+						Value:       value,
+						Schema:      schema,
+						SchemaField: schema.Discriminator.PropertyName,
+						Reason:      fmt.Sprintf("required discriminator property %d is missing or not a string", schema.Discriminator.PropertyName),
+					}
+				} else {
+					val = v
+				}
+				if schema.Discriminator.Mapping != nil {
+					val = schema.Discriminator.Mapping["val"]
+				}
+				if strings.HasSuffix(item.Ref, val) {
+					ok = 1
+					if err := v.visitJSON(value, fast); err != nil {
+						if fast {
+							return errSchema
+						}
+						return &SchemaError{
+							Value:       value,
+							Schema:      schema,
+							SchemaField: "oneOf",
+							Origin: err,
+						}
+					}
+				}
 			}
 		}
 		if ok != 1 {
