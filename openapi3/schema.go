@@ -694,7 +694,7 @@ func (schema *Schema) visitSetOperations(value interface{}, fast bool) (err erro
 					val = v
 				}
 				if schema.Discriminator.Mapping != nil {
-					val = schema.Discriminator.Mapping["val"]
+					val = schema.Discriminator.Mapping[val]
 				}
 				if strings.HasSuffix(item.Ref, val) {
 					ok = 1
