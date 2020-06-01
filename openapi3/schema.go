@@ -688,7 +688,7 @@ func (schema *Schema) visitSetOperations(value interface{}, fast bool) (err erro
 						Value:       value,
 						Schema:      schema,
 						SchemaField: schema.Discriminator.PropertyName,
-						Reason:      fmt.Sprintf("required discriminator property %d is missing or not a string", schema.Discriminator.PropertyName),
+						Reason:      fmt.Sprintf("required discriminator property %s is missing or not a string", schema.Discriminator.PropertyName),
 					}
 				} else {
 					val = v
@@ -696,7 +696,7 @@ func (schema *Schema) visitSetOperations(value interface{}, fast bool) (err erro
 				if schema.Discriminator.Mapping != nil {
 					val = schema.Discriminator.Mapping[val]
 				}
-				if strings.HasSuffix(item.Ref, val) {
+				if strings.HasSuffix(item.Ref, "/"+val) {
 					ok = 1
 					if err := v.visitJSON(value, fast); err != nil {
 						if fast {

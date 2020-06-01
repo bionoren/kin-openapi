@@ -1,5 +1,7 @@
 module github.com/getkin/kin-openapi
 
+go 1.14
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0
